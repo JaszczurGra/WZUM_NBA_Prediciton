@@ -36,14 +36,14 @@ def collect_season(season: str) -> pd.DataFrame:
 
     print(f"  Fetching traditional stats for {season}...")
     trad = LeagueDashPlayerStats(
-        season=season, per_mode_simple="PerGame"
+        season=season, per_mode_detailed="PerGame"
     ).get_data_frames()[0]
     _sleep()
 
     print(f"  Fetching advanced stats for {season}...")
     adv = LeagueDashPlayerStats(
         season=season,
-        per_mode_simple="PerGame",
+        per_mode_detailed="PerGame",
         measure_type_detailed_defense="Advanced",
     ).get_data_frames()[0]
     _sleep()
