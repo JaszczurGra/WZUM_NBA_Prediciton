@@ -9,19 +9,17 @@ Run once; already-cached CSV files are skipped.
 
 import os
 import time
-import glob
 import pandas as pd
 from nba_api.stats.endpoints import (
     LeagueDashPlayerStats,
     LeagueStandingsV3,
-    CommonPlayerInfo,
 )
-from nba_api.stats.static import players as static_players
+
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "raw")
 os.makedirs(DATA_DIR, exist_ok=True)
 
-SEASONS = [f"{y}-{str(y + 1)[-2:]:0>2}" for y in range(2000, 2026)]
+SEASONS = [f"{y}-{str(y + 1)[-2:]:0>2}" for y in range(1996, 2026)]
 
 
 def _sleep():
@@ -30,9 +28,6 @@ def _sleep():
 
 def collect_season(season: str) -> pd.DataFrame:
     out_path = os.path.join(DATA_DIR, f"player_stats_{season}.csv")
-    if os.path.exists(out_path):
-        print(f"  [skip] {season} already cached")
-        return pd.read_csv(out_path)
 
     print(f"  Fetching traditional stats for {season}...")
     trad = LeagueDashPlayerStats(
@@ -59,7 +54,6 @@ def collect_season(season: str) -> pd.DataFrame:
         wins = pd.DataFrame(columns=["TEAM_ID", "TEAM_WINS"])
     _sleep()
 
-    # Keep only the advanced columns we need (avoid duplicate column names)
     adv_cols = ["PLAYER_ID"] + [
         c for c in ["NET_RATING", "AST_PCT", "REB_PCT", "USG_PCT", "PIE", "TS_PCT"]
         if c in adv.columns
@@ -84,9 +78,6 @@ def collect_rookie_years() -> pd.DataFrame:
     Falls back to CommonPlayerInfo for undrafted players found in our stats CSVs.
     """
     out_path = os.path.join(DATA_DIR, "players_rookie_year.csv")
-    if os.path.exists(out_path):
-        print("  [skip] players_rookie_year.csv already cached")
-        return pd.read_csv(out_path)
 
     from nba_api.stats.endpoints import DraftHistory, CommonPlayerInfo
 

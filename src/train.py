@@ -18,7 +18,6 @@ import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.model_selection import LeaveOneGroupOut
 
-# Allow running from project root or from src/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.features import build_feature_matrix
 
@@ -27,9 +26,11 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 
+#Skipping the last season data 
 def load_all_seasons() -> pd.DataFrame:
     pattern = os.path.join(DATA_DIR, "player_stats_*.csv")
     files = sorted(glob.glob(pattern))
+    files = [f for f in files if "player_stats_2025-26.csv" not in f]
     if not files:
         raise FileNotFoundError(f"No stats CSVs found at {pattern}. Run collect_stats.py first.")
     dfs = []

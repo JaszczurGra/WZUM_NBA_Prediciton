@@ -2,8 +2,10 @@
 Scrapes historical All-NBA and All-Rookie award data from Basketball Reference.
 
 Outputs:
-  data/raw/allnba_labels.csv   — season, player_name, tier (1/2/3)
-  data/raw/allrookie_labels.csv — season, player_name, tier (1/2)
+  data/raw/allnba_labels.csv          — all seasons except the latest, season, player_name, tier (1/2/3)
+  data/raw/allrookie_labels.csv       — all seasons except the latest, season, player_name, tier (1/2)
+  data/raw/current_allnba_labels.csv   — latest season only
+  data/raw/current_allrookie_labels.csv — latest season only
 
 Run once; cached files are skipped.
 """
@@ -35,30 +37,17 @@ def _season_str_to_key(text: str) -> str:
 
 
 def scrape_allnba() -> pd.DataFrame:
-    """
-    Basketball Reference All-NBA page layout:
-    Each award year has rows like:
-      Season | Lg | Tm | Player | ...
-    The 'Tm' column cycles 1st/2nd/3rd Team across consecutive rows.
-    """
+    print("Scraping All-NBA labels")
     out_path = os.path.join(DATA_DIR, "allnba_labels.csv")
-    if os.path.exists(out_path):
-        print("  [skip] allnba_labels.csv already cached")
-        return pd.read_csv(out_path)
 
-    url = "https://www.basketball-reference.com/awards/all_nba.html"
-    print(f"  GET {url}")
+    url = "https://www.basketball-reference.com/awards/all_league.html"
     r = requests.get(url, headers=HEADERS, timeout=30)
     r.raise_for_status()
+    r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
 
-    # Find the awards table — bref uses id="awards_all_nba" or similar
     table = soup.find("table", {"id": re.compile(r"awards", re.I)})
-    if table is None:
-        # Fallback: first large table on the page
-        tables = soup.find_all("table")
-        table = max(tables, key=lambda t: len(t.find_all("tr")))
 
     records = []
     for tr in table.find_all("tr"):
@@ -67,23 +56,18 @@ def scrape_allnba() -> pd.DataFrame:
             continue
         texts = [c.get_text(strip=True) for c in cells]
 
-        # Row has a season like "2023-24" in first cell
         season_match = re.match(r"\d{4}-\d{2}", texts[0])
         if not season_match:
             continue
 
         season = texts[0]
-        # Find the player link (anchor tag with /players/ href)
-        player_anchor = None
-        for c in cells:
-            a = c.find("a", href=re.compile(r"/players/"))
-            if a:
-                player_anchor = a
-                break
-        if not player_anchor:
+        # Collect all player links in the row (5 per team)
+        player_anchors = [
+            a for c in cells
+            for a in c.find_all("a", href=re.compile(r"/players/"))
+        ]
+        if not player_anchors:
             continue
-
-        player_name = player_anchor.get_text(strip=True)
 
         # Tier: look for text like "1st", "2nd", "3rd" in any cell
         tier = None
@@ -97,29 +81,32 @@ def scrape_allnba() -> pd.DataFrame:
         if tier is None:
             continue
 
-        records.append({"season": season, "player_name": player_name, "tier": tier})
+        for a in player_anchors:
+            records.append({"season": season, "player_name": a.get_text(strip=True), "tier": tier})
 
     df = pd.DataFrame(records)
-    if df.empty:
-        # Try alternate parsing: table has header row with year spanning multiple data rows
-        df = _scrape_award_table_grouped(soup, "all_nba")
-
     df = df[df["season"].str.match(r"\d{4}-\d{2}$")]
-    df.to_csv(out_path, index=False)
-    print(f"  Saved {len(df)} rows → {out_path}")
+
+    latest_season = df["season"].max()
+    current_df = df[df["season"] == latest_season]
+    historical_df = df[df["season"] != latest_season]
+
+    historical_df.to_csv(out_path, index=False)
+    current_path = os.path.join(DATA_DIR, "allnba_labels_current.csv")
+    current_df.to_csv(current_path, index=False)
+    print(f"Saved {len(historical_df)} rows → {out_path}")
+    print(f"Saved {len(current_df)} rows (season {latest_season}) → {current_path}")
     return df
 
 
 def scrape_allrookie() -> pd.DataFrame:
+    print("Scraping All-Rookie labels")
     out_path = os.path.join(DATA_DIR, "allrookie_labels.csv")
-    if os.path.exists(out_path):
-        print("  [skip] allrookie_labels.csv already cached")
-        return pd.read_csv(out_path)
 
     url = "https://www.basketball-reference.com/awards/all_rookie.html"
-    print(f"  GET {url}")
     r = requests.get(url, headers=HEADERS, timeout=30)
     r.raise_for_status()
+    r.encoding = "utf-8"
 
     soup = BeautifulSoup(r.text, "html.parser")
 
@@ -140,16 +127,12 @@ def scrape_allrookie() -> pd.DataFrame:
             continue
 
         season = texts[0]
-        player_anchor = None
-        for c in cells:
-            a = c.find("a", href=re.compile(r"/players/"))
-            if a:
-                player_anchor = a
-                break
-        if not player_anchor:
+        player_anchors = [
+            a for c in cells
+            for a in c.find_all("a", href=re.compile(r"/players/"))
+        ]
+        if not player_anchors:
             continue
-
-        player_name = player_anchor.get_text(strip=True)
 
         tier = None
         for t in texts:
@@ -160,73 +143,26 @@ def scrape_allrookie() -> pd.DataFrame:
         if tier is None:
             continue
 
-        records.append({"season": season, "player_name": player_name, "tier": tier})
+        for a in player_anchors:
+            records.append({"season": season, "player_name": a.get_text(strip=True), "tier": tier})
 
     df = pd.DataFrame(records)
-    if df.empty:
-        df = _scrape_award_table_grouped(soup, "all_rookie")
-
     df = df[df["season"].str.match(r"\d{4}-\d{2}$")]
-    df.to_csv(out_path, index=False)
-    print(f"  Saved {len(df)} rows → {out_path}")
+
+    latest_season = df["season"].max()
+    current_df = df[df["season"] == latest_season]
+    historical_df = df[(df["season"] >= '1996-97') & (df["season"] < latest_season)]
+
+    historical_df.to_csv(out_path, index=False)
+    current_path = os.path.join(DATA_DIR, "allrookie_labels_current.csv")
+    current_df.to_csv(current_path, index=False)
+    print(f"Saved {len(historical_df)} rows → {out_path}")
+    print(f"Saved {len(current_df)} rows (season {latest_season}) → {current_path}")
     return df
 
 
-def _scrape_award_table_grouped(soup: BeautifulSoup, award_type: str) -> pd.DataFrame:
-    """
-    Fallback parser for bref tables where the season column only appears on
-    the first row of a group and subsequent rows for the same season are blank.
-    """
-    records = []
-    current_season = None
-    current_tier = None
-
-    tables = soup.find_all("table")
-    if not tables:
-        return pd.DataFrame(columns=["season", "player_name", "tier"])
-
-    table = tables[0]
-
-    for tr in table.find_all("tr"):
-        cells = tr.find_all(["td", "th"])
-        if not cells:
-            continue
-        texts = [c.get_text(strip=True) for c in cells]
-
-        if re.match(r"\d{4}-\d{2}", texts[0]):
-            current_season = texts[0]
-
-        if not current_season:
-            continue
-
-        # Detect tier from cell text
-        for t in texts:
-            if t in ("1st Team", "1st"):
-                current_tier = 1
-            elif t in ("2nd Team", "2nd"):
-                current_tier = 2
-            elif t in ("3rd Team", "3rd"):
-                current_tier = 3
-
-        for c in cells:
-            a = c.find("a", href=re.compile(r"/players/"))
-            if a:
-                records.append({
-                    "season": current_season,
-                    "player_name": a.get_text(strip=True),
-                    "tier": current_tier,
-                })
-
-    return pd.DataFrame(records)
-
 
 if __name__ == "__main__":
-    print("=== Scraping All-NBA labels ===")
-    df_nba = scrape_allnba()
-    print(df_nba.tail())
-
-    print("\n=== Scraping All-Rookie labels ===")
-    df_rook = scrape_allrookie()
-    print(df_rook.tail())
-
-    print("\nDone.")
+    scrape_allnba()
+    scrape_allrookie()
+    print("Done.")

@@ -12,9 +12,12 @@ NOTE: Verify that key names match the schema in lab_projekt_2026.ipynb.
 """
 
 import os
+import re
 import sys
 import json
 import pickle
+import argparse
+import unicodedata
 import numpy as np
 import pandas as pd
 
@@ -73,8 +76,6 @@ def predict(output_path: str):
 
     rookie_mask = meta["is_rookie"].values
     rookie_count = rookie_mask.sum()
-    print(f"  Rookies in 2025-26: {rookie_count}")
-
     if rookie_count < 10:
         print(f"  [warn] Only {rookie_count} rookies found — All-Rookie teams may be incomplete")
 
@@ -99,8 +100,79 @@ def predict(output_path: str):
         print(f"  {key}: {players}")
 
 
+def _norm(name: str) -> str:
+    name = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z ]", "", name.lower().strip())
+
+
+
+
+
+
+
+
+
+def final_score(prediction_path: str) -> dict:
+    """Score the predictions against the actual labels for the latest season."""
+    def _score_team(predicted: list, actual_by_tier: dict, pred_tier: int) -> int:
+        """Score one predicted team of 5 against the actual tier map."""
+        base = 0
+        exact = 0
+        for player in predicted:
+            n = _norm(player)
+            actual_tier = next((t for t, names in actual_by_tier.items() if n in names), None)
+            if actual_tier is None:
+                continue
+            diff = abs(pred_tier - actual_tier)
+            if diff == 0:
+                base += 10
+                exact += 1
+            elif diff == 1:
+                base += 8
+            elif diff == 2:
+                base += 6
+        bonus = [0,5,10,20,40][exact] if exact <= 5 else 0
+        return base + bonus
+
+    with open(prediction_path, "r", encoding="utf-8") as f:
+        pred = json.load(f)
+
+
+
+    def _tier_map(csv_path: str) -> dict:
+        df = pd.read_csv(csv_path)
+        tiers = {}
+        for _, row in df.iterrows():
+            tiers.setdefault(int(row["tier"]), set()).add(_norm(row["player_name"]))
+        return tiers
+
+    nba_tiers  = _tier_map(os.path.join(DATA_DIR, "allnba_labels_current.csv"))
+    rook_tiers = _tier_map(os.path.join(DATA_DIR, "allrookie_labels_current.csv"))
+
+    teams = {
+        "all_nba_first_team":     (pred.get("all_nba_first_team",     []), nba_tiers,  1),
+        "all_nba_second_team":    (pred.get("all_nba_second_team",    []), nba_tiers,  2),
+        "all_nba_third_team":     (pred.get("all_nba_third_team",     []), nba_tiers,  3),
+        "all_rookie_first_team":  (pred.get("all_rookie_first_team",  []), rook_tiers, 1),
+        "all_rookie_second_team": (pred.get("all_rookie_second_team", []), rook_tiers, 2),
+    }
+
+    scores = {}
+    for key, (players, tier_map, pred_tier) in teams.items():
+        scores[key] = _score_team(players, tier_map, pred_tier)
+    scores["total"] = sum(v for k, v in scores.items() if k != "total")
+    return scores
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python src/predict.py <output_path>")
-        sys.exit(1)
-    predict(sys.argv[1])
+    parser = argparse.ArgumentParser(description="Generate NBA award predictions.")
+    parser.add_argument("output_path", help="Path to write the output JSON file.")
+    parser.add_argument("--score", action="store_true", default=False)
+    args = parser.parse_args()
+
+    predict(args.output_path)
+
+    if args.score:
+        score = final_score(args.output_path)
+        print(f"\nFinal Score: {score['total']}/900 (details: {score})")
+            

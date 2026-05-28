@@ -90,10 +90,7 @@ def build_feature_matrix(
         on=["SEASON", "PLAYER_NAME_NORM"],
         how="left",
     )
-    if len(merged) != n_before:
-        # Defensive: should not happen with unique player names but drop duplicates
-        merged = merged.drop_duplicates(subset=["PLAYER_ID", "SEASON"])
-
+    merged = merged.drop_duplicates(subset=["PLAYER_ID", "SEASON"])
     merged["tier"] = merged["tier"].fillna(0).astype(int)
 
     # Binary: selected (any tier) vs not selected

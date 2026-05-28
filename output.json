@@ -1,0 +1,37 @@
+{
+  "all_nba_first_team": [
+    "Shai Gilgeous-Alexander",
+    "Jaylen Brown",
+    "Cade Cunningham",
+    "Anthony Edwards",
+    "Donovan Mitchell"
+  ],
+  "all_nba_second_team": [
+    "Jamal Murray",
+    "Kevin Durant",
+    "Jalen Johnson",
+    "Tyrese Maxey",
+    "Victor Wembanyama"
+  ],
+  "all_nba_third_team": [
+    "Jalen Brunson",
+    "Luka Dončić",
+    "Chet Holmgren",
+    "Karl-Anthony Towns",
+    "Kawhi Leonard"
+  ],
+  "all_rookie_first_team": [
+    "Kon Knueppel",
+    "VJ Edgecombe",
+    "Cooper Flagg",
+    "Jeremiah Fears",
+    "Dylan Harper"
+  ],
+  "all_rookie_second_team": [
+    "Derik Queen",
+    "Cedric Coward",
+    "Ace Bailey",
+    "Ryan Kalkbrenner",
+    "Maxime Raynaud"
+  ]
+}
