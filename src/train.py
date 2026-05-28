@@ -13,20 +13,24 @@ import os
 import sys
 import glob
 import pickle
+import time 
 import numpy as np
 import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.model_selection import LeaveOneGroupOut
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from src.features import build_feature_matrix
+from src.features import build_feature_matrix, FEATURE_COLS
+
+
+MONOTONE = "(" + ",".join(["1"] * len(FEATURE_COLS)) + ")"
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 
-#Skipping the last season data 
+
 def load_all_seasons() -> pd.DataFrame:
     pattern = os.path.join(DATA_DIR, "player_stats_*.csv")
     files = sorted(glob.glob(pattern))
@@ -52,11 +56,11 @@ def _xgb_model(pos_weight: float) -> XGBClassifier:
         eval_metric="logloss",
         random_state=42,
         n_jobs=-1,
+        monotone_constraints=MONOTONE,
     )
 
 
 def evaluate_logo(X, y, groups, n_select: int, label: str):
-    """Leave-one-season-out CV; prints avg top-N overlap with ground truth."""
     logo = LeaveOneGroupOut()
     scores = []
     for tr_idx, te_idx in logo.split(X, y, groups):
@@ -97,9 +101,6 @@ def train_rookie(all_stats: pd.DataFrame, rookie_year_df: pd.DataFrame) -> XGBCl
     mask = meta_all["is_rookie"].values
     X, y, meta = X_all[mask], y_all[mask], meta_all[mask].reset_index(drop=True)
 
-    if len(y) == 0 or y.sum() == 0:
-        print("  [warn] No rookie label rows found — check data/raw/allrookie_labels.csv")
-        return _xgb_model(30.0)
 
     pos_weight = (y == 0).sum() / max(1, (y == 1).sum())
     print(f"  Rookie class ratio: {pos_weight:.1f}:1")
@@ -112,30 +113,25 @@ def train_rookie(all_stats: pd.DataFrame, rookie_year_df: pd.DataFrame) -> XGBCl
     return model
 
 
+
+
 if __name__ == "__main__":
-    print("=== Loading stats ===")
     all_stats = load_all_seasons()
+    
+    start_time = time.time()
     print(f"  Loaded {len(all_stats)} player-season rows across {all_stats['SEASON'].nunique()} seasons")
 
     rookie_year_path = os.path.join(DATA_DIR, "players_rookie_year.csv")
-    if os.path.exists(rookie_year_path):
-        rookie_year_df = pd.read_csv(rookie_year_path)
-    else:
-        print("  [warn] players_rookie_year.csv not found — rookie model will have no is_rookie info")
-        rookie_year_df = None
+    rookie_year_df = pd.read_csv(rookie_year_path)
 
-    print("\n=== Training All-NBA model ===")
     allnba_model = train_allnba(all_stats, rookie_year_df)
     allnba_path = os.path.join(MODELS_DIR, "allnba_model.pkl")
     with open(allnba_path, "wb") as f:
         pickle.dump(allnba_model, f)
-    print(f"  Saved → {allnba_path}")
 
-    print("\n=== Training All-Rookie model ===")
     rookie_model = train_rookie(all_stats, rookie_year_df)
     rookie_path = os.path.join(MODELS_DIR, "rookie_model.pkl")
     with open(rookie_path, "wb") as f:
         pickle.dump(rookie_model, f)
-    print(f"  Saved → {rookie_path}")
 
-    print("\nTraining complete.")
+    print(f"\nTraining completed in {time.time() - start_time:.1f}s")

@@ -4,11 +4,10 @@ Generate NBA award predictions for the 2025-26 season.
 Usage:
     python src/predict.py /path/to/Mikolajczak_Julian.json
 
-Outputs a JSON file with 5 keys (each a list of 5 player name strings):
-    all_nba_first_team, all_nba_second_team, all_nba_third_team,
-    all_rookie_first_team, all_rookie_second_team
-
-NOTE: Verify that key names match the schema in lab_projekt_2026.ipynb.
+Outputs a JSON file with 5 keys (each a list of 5 player name strings),
+matching the format specified in Lab_projekt_2026.ipynb (Dane Wyjściowe):
+    "first all-nba team", "second all-nba team", "third all-nba team",
+    "first rookie all-nba team", "second rookie all-nba team"
 """
 
 import os
@@ -84,11 +83,11 @@ def predict(output_path: str):
     rookie_probs = rookie_model.predict_proba(rookie_X)[:, 1] if len(rookie_X) > 0 else np.array([])
 
     output = {
-        "all_nba_first_team":    top_names(allnba_probs, meta, 0, 5),
-        "all_nba_second_team":   top_names(allnba_probs, meta, 5, 10),
-        "all_nba_third_team":    top_names(allnba_probs, meta, 10, 15),
-        "all_rookie_first_team": top_names(rookie_probs, rookie_meta, 0, 5) if len(rookie_probs) >= 5 else [],
-        "all_rookie_second_team":top_names(rookie_probs, rookie_meta, 5, 10) if len(rookie_probs) >= 10 else [],
+        "first all-nba team":         top_names(allnba_probs, meta, 0, 5),
+        "second all-nba team":        top_names(allnba_probs, meta, 5, 10),
+        "third all-nba team":         top_names(allnba_probs, meta, 10, 15),
+        "first rookie all-nba team":  top_names(rookie_probs, rookie_meta, 0, 5) if len(rookie_probs) >= 5 else [],
+        "second rookie all-nba team": top_names(rookie_probs, rookie_meta, 5, 10) if len(rookie_probs) >= 10 else [],
     }
 
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
@@ -131,7 +130,7 @@ def final_score(prediction_path: str) -> dict:
                 base += 8
             elif diff == 2:
                 base += 6
-        bonus = [0,5,10,20,40][exact] if exact <= 5 else 0
+        bonus = [0, 0, 5, 10, 20, 40][exact] if exact <= 5 else 0
         return base + bonus
 
     with open(prediction_path, "r", encoding="utf-8") as f:
@@ -150,11 +149,11 @@ def final_score(prediction_path: str) -> dict:
     rook_tiers = _tier_map(os.path.join(DATA_DIR, "allrookie_labels_current.csv"))
 
     teams = {
-        "all_nba_first_team":     (pred.get("all_nba_first_team",     []), nba_tiers,  1),
-        "all_nba_second_team":    (pred.get("all_nba_second_team",    []), nba_tiers,  2),
-        "all_nba_third_team":     (pred.get("all_nba_third_team",     []), nba_tiers,  3),
-        "all_rookie_first_team":  (pred.get("all_rookie_first_team",  []), rook_tiers, 1),
-        "all_rookie_second_team": (pred.get("all_rookie_second_team", []), rook_tiers, 2),
+        "first all-nba team":         (pred.get("first all-nba team",         []), nba_tiers,  1),
+        "second all-nba team":        (pred.get("second all-nba team",        []), nba_tiers,  2),
+        "third all-nba team":         (pred.get("third all-nba team",         []), nba_tiers,  3),
+        "first rookie all-nba team":  (pred.get("first rookie all-nba team",  []), rook_tiers, 1),
+        "second rookie all-nba team": (pred.get("second rookie all-nba team", []), rook_tiers, 2),
     }
 
     scores = {}
@@ -174,5 +173,7 @@ if __name__ == "__main__":
 
     if args.score:
         score = final_score(args.output_path)
-        print(f"\nFinal Score: {score['total']}/900 (details: {score})")
+        # One label set maxes at 450 (5 teams x 90). The official grade scores
+        # twice (official NBA results + instructor picks) for a 900 total.
+        print(f"\nFinal Score: {score['total']}/450 (details: {score})")
             

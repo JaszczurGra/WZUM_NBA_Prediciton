@@ -22,18 +22,7 @@ from bs4 import BeautifulSoup
 DATA_DIR = os.path.join(os.path.dirname(__file__), "raw")
 os.makedirs(DATA_DIR, exist_ok=True)
 
-HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; research-bot/1.0)"}
-
-
-def normalize_name(name: str) -> str:
-    """Lowercase, strip accents, remove non-alpha chars for fuzzy matching."""
-    name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
-    return re.sub(r"[^a-z ]", "", name.lower().strip())
-
-
-def _season_str_to_key(text: str) -> str:
-    """Convert bref season like '2023-24' to nba_api style '2023-24'."""
-    return text.strip()
+HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
 def scrape_allnba() -> pd.DataFrame:
@@ -61,15 +50,12 @@ def scrape_allnba() -> pd.DataFrame:
             continue
 
         season = texts[0]
-        # Collect all player links in the row (5 per team)
         player_anchors = [
             a for c in cells
             for a in c.find_all("a", href=re.compile(r"/players/"))
         ]
         if not player_anchors:
             continue
-
-        # Tier: look for text like "1st", "2nd", "3rd" in any cell
         tier = None
         for t in texts:
             if t == "1st":
@@ -165,4 +151,3 @@ def scrape_allrookie() -> pd.DataFrame:
 if __name__ == "__main__":
     scrape_allnba()
     scrape_allrookie()
-    print("Done.")

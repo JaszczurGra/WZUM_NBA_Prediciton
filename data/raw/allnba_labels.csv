@@ -1,5 +1,5 @@
 season,player_name,tier
-2024-25,Nikola JokiÄ,1
+2024-25,Nikola Jokić,1
 2024-25,Giannis Antetokounmpo,1
 2024-25,Jayson Tatum,1
 2024-25,Shai Gilgeous-Alexander,1
@@ -14,10 +14,10 @@ season,player_name,tier
 2024-25,Cade Cunningham,3
 2024-25,Tyrese Haliburton,3
 2024-25,James Harden,3
-2023-24,Nikola JokiÄ,1
+2023-24,Nikola Jokić,1
 2023-24,Giannis Antetokounmpo,1
 2023-24,Jayson Tatum,1
-2023-24,Luka DonÄiÄ,1
+2023-24,Luka Dončić,1
 2023-24,Shai Gilgeous-Alexander,1
 2023-24,Anthony Davis,2
 2023-24,Kevin Durant,2
@@ -32,9 +32,9 @@ season,player_name,tier
 2022-23,Joel Embiid,1
 2022-23,Giannis Antetokounmpo,1
 2022-23,Jayson Tatum,1
-2022-23,Luka DonÄiÄ,1
+2022-23,Luka Dončić,1
 2022-23,Shai Gilgeous-Alexander,1
-2022-23,Nikola JokiÄ,2
+2022-23,Nikola Jokić,2
 2022-23,Jimmy Butler,2
 2022-23,Jaylen Brown,2
 2022-23,Donovan Mitchell,2
@@ -44,10 +44,10 @@ season,player_name,tier
 2022-23,Julius Randle,3
 2022-23,De'Aaron Fox,3
 2022-23,Damian Lillard,3
-2021-22,Nikola JokiÄ,1
+2021-22,Nikola Jokić,1
 2021-22,Giannis Antetokounmpo,1
 2021-22,Jayson Tatum,1
-2021-22,Luka DonÄiÄ,1
+2021-22,Luka Dončić,1
 2021-22,Devin Booker,1
 2021-22,Joel Embiid,2
 2021-22,Kevin Durant,2
@@ -59,11 +59,11 @@ season,player_name,tier
 2021-22,Pascal Siakam,3
 2021-22,Chris Paul,3
 2021-22,Trae Young,3
-2020-21,Nikola JokiÄ,1
+2020-21,Nikola Jokić,1
 2020-21,Giannis Antetokounmpo,1
 2020-21,Kawhi Leonard,1
 2020-21,Stephen Curry,1
-2020-21,Luka DonÄiÄ,1
+2020-21,Luka Dončić,1
 2020-21,Joel Embiid,2
 2020-21,Julius Randle,2
 2020-21,LeBron James,2
@@ -78,8 +78,8 @@ season,player_name,tier
 2019-20,Giannis Antetokounmpo,1
 2019-20,LeBron James,1
 2019-20,James Harden,1
-2019-20,Luka DonÄiÄ,1
-2019-20,Nikola JokiÄ,2
+2019-20,Luka Dončić,1
+2019-20,Nikola Jokić,2
 2019-20,Kawhi Leonard,2
 2019-20,Pascal Siakam,2
 2019-20,Damian Lillard,2
@@ -89,7 +89,7 @@ season,player_name,tier
 2019-20,Jimmy Butler,3
 2019-20,Ben Simmons,3
 2019-20,Russell Westbrook,3
-2018-19,Nikola JokiÄ,1
+2018-19,Nikola Jokić,1
 2018-19,Giannis Antetokounmpo,1
 2018-19,Paul George,1
 2018-19,James Harden,1
@@ -177,7 +177,7 @@ season,player_name,tier
 2013-14,Al Jefferson,3
 2013-14,Paul George,3
 2013-14,LaMarcus Aldridge,3
-2013-14,Goran DragiÄ,3
+2013-14,Goran Dragić,3
 2013-14,Damian Lillard,3
 2012-13,Tim Duncan,1
 2012-13,Kevin Durant,1
@@ -222,7 +222,7 @@ season,player_name,tier
 2010-11,Al Horford,3
 2010-11,LaMarcus Aldridge,3
 2010-11,Zach Randolph,3
-2010-11,Manu GinÃ³bili,3
+2010-11,Manu Ginóbili,3
 2010-11,Chris Paul,3
 2009-10,Dwight Howard,1
 2009-10,Kevin Durant,1
@@ -267,7 +267,7 @@ season,player_name,tier
 2007-08,Yao Ming,3
 2007-08,Carlos Boozer,3
 2007-08,Paul Pierce,3
-2007-08,Manu GinÃ³bili,3
+2007-08,Manu Ginóbili,3
 2007-08,Tracy McGrady,3
 2006-07,Amar'e Stoudemire,1
 2006-07,Tim Duncan,1
@@ -321,7 +321,7 @@ season,player_name,tier
 2003-04,Jason Kidd,1
 2003-04,Ben Wallace,2
 2003-04,Jermaine O'Neal,2
-2003-04,Peja StojakoviÄ,2
+2003-04,Peja Stojaković,2
 2003-04,Sam Cassell,2
 2003-04,Tracy McGrady,2
 2003-04,Yao Ming,3
@@ -493,7 +493,7 @@ season,player_name,tier
 1992-93,Derrick Coleman,3
 1992-93,Scottie Pippen,3
 1992-93,Tim Hardaway,3
-1992-93,DraÅ¾en PetroviÄ,3
+1992-93,Dražen Petrović,3
 1991-92,David Robinson,1
 1991-92,Karl Malone,1
 1991-92,Chris Mullin,1

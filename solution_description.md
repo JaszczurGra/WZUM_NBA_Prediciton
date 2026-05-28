@@ -10,19 +10,19 @@ This is treated as a **ranking problem**: train a binary classifier (selected vs
 
 **Player statistics** are collected via the `nba_api` library, which provides official NBA stats through the `LeagueDashPlayerStats` endpoint. For each season from 2000-01 through 2025-26, both traditional per-game stats (points, rebounds, assists, steals, blocks, shooting percentages, games played, minutes) and advanced metrics (Net Rating, AST%, REB%, USG%, PIE, TS%) are collected. Team win totals are collected via `LeagueStandingsV3`.
 
-**Historical award labels** (which players were named All-NBA or All-Rookie each season) are scraped from Basketball Reference using `requests` and `BeautifulSoup`, covering the same date range.
+**Historical award labels** (which players were named All-NBA or All-Rookie each season) are scraped from Basketball Reference using `requests` and `BeautifulSoup`, covering the same date range. Player names are normalized to UTF-8 and matched to the stats by an accent-insensitive key, so accented names (e.g. Jokić, Dončić, Šarić) join correctly to their award labels rather than being silently dropped from the positive examples.
 
 All raw data is cached to CSV files in `data/raw/` so the collection step only runs once.
 
 ## Feature Engineering
 
-All counting statistics are **percentile-ranked within each season** before being used as features. This normalization makes the model season-agnostic — a 25 PPG scorer in 2003 (a low-scoring era) gets the same feature value as a 25 PPG scorer in 2023 if they both rank at the same percentile among their peers. Without this, the model would need to learn era-specific thresholds.
+Every statistic is **percentile-ranked within each season** before being used as a feature. This normalization makes the model season-agnostic — a 25 PPG scorer in 2003 (a low-scoring era) gets the same feature value as a 25 PPG scorer in 2023 if they both rank at the same percentile among their peers. Without this, the model would need to learn era-specific thresholds.
 
-The final feature set (17 features) consists of:
-- **Percentile-ranked counting stats**: PTS, REB, AST, STL, BLK, GP, MIN, Net Rating, PIE, Team Wins
-- **Raw efficiency stats**: FG%, 3P%, FT%, TS%, USG%, AST%, REB%
+The final feature set (17 features) consists of season percentile ranks of:
+- **Counting / impact stats**: PTS, REB, AST, STL, BLK, GP, MIN, Net Rating, PIE, Team Wins
+- **Efficiency stats**: FG%, 3P%, FT%, TS%, USG%, AST%, REB%
 
-Efficiency stats are not percentile-ranked because their meaning is already scale-independent.
+The efficiency stats are percentile-ranked as well (rather than used raw) because league-wide efficiency has drifted upward over the training span — average true-shooting and three-point rates in 2025 are materially higher than in 2000. Ranking within season removes this drift so a future season is comparable to the historical training data, and it puts every feature on a common [0, 1] scale.
 
 ## Model
 
@@ -36,7 +36,9 @@ Gradient boosted trees were chosen because:
 
 The model predicts the probability P(player is All-NBA selected). Players are ranked by this probability; ranks 1–5 become First Team, 6–10 become Second Team, 11–15 become Third Team.
 
-A separate model is trained for All-Rookie on the same features, but fit only on rows where `is_rookie == True`.
+**Monotonic constraints.** Each feature is constrained so that the predicted selection probability is *non-decreasing* in it (`monotone_constraints = (1, …, 1)`). Because every feature is a percentile rank oriented "higher = better", this encodes a single domain-agnostic prior: more production never lowers a player's score. This is standard regularization — it is applied uniformly through the features and does not name, weight, or hand-pick any individual player; the model still does all of the selecting. The constraint is necessary because the unconstrained model learned a spurious *backwards* relationship — high rebound% and assist% (which historically correlate with non-star role-playing bigs) were treated as negative signals, which buried genuinely elite playmaking bigs such as Nikola Jokić. Adding the constraint corrects this without any manual intervention and improves cross-validated accuracy across seasons.
+
+A separate model is trained for All-Rookie on the same features and with the same constraints, but fit only on rows where `is_rookie == True`.
 
 ## Training
 
