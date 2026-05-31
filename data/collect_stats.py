@@ -91,14 +91,14 @@ def collect_rookie_years() -> pd.DataFrame:
         print(f"  Undrafted / missing players to look up: {len(missing_ids)}")
         extra_rows = []
         for i, pid in enumerate(sorted(missing_ids)):
-            if i % 50 == 0 and i > 0:
-                print(f"    {i}/{len(missing_ids)}...")
+            if i % 5 == 0 and i > 0: print(f"    {i}/{len(missing_ids)}...")
             try:
                 info = CommonPlayerInfo(player_id=pid).get_data_frames()[0]
                 from_year = int(info["FROM_YEAR"].iloc[0])
                 extra_rows.append({"PLAYER_ID": pid,
                                    "PLAYER_NAME": all_id_name[pid][0],
                                    "DEBUT_YEAR": from_year})
+                time.sleep(0.1)
             except Exception:
                 extra_rows.append({"PLAYER_ID": pid,
                                    "PLAYER_NAME": all_id_name[pid][0],
@@ -113,6 +113,10 @@ def collect_rookie_years() -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+    start = time.time()
     for season in SEASONS:
         collect_season(season)
+    print( f"Finished collecting season stats in {time.time() - start:.1f} seconds.")
+    start = time.time()
     collect_rookie_years()
+    print( f"Finished collecting rookie years in {time.time() - start:.1f} seconds.")
