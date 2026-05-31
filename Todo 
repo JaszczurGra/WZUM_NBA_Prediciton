@@ -1,0 +1,15 @@
+[] Merge 6. Model with 8. Porównanie wariantów modeli oraz Jak działa `XGBClassifier` (gradient boosting) so that it's goig forward like i have tried that then added and so on and htat f.e no monotone it was just an experiment  
+And shorten it a bit  
+
+[]dlaczego byl wybrany mniejszy model mimo ze pare modeli ma takie same mean top-N overlap? poniewaz uzywajac drugiej metody oceniania ledwo ale jendka on wygyrwa 
+podkresl ze jest czyst korelacja miedzy sposobami oceniania jak jeden rosnie to i drugi tez rosnie 
+
+
+[] Rewrite the podsumowanie to be short and tresciwe just what was achieved the hiehst score that the output is in file Julian_Mikolajczak.json
+
+those were final overlaps u can also add them here  All-NBA class ratio: 31.5:1
+  All-NBA CV avg top-15 overlap: 80.23% over 29 seasons
+  Rookie class ratio: 7.2:1
+  All-Rookie CV avg top-10 overlap: 78.28% over 29 seasons 
+
+and that the final score was 322 for already ogloszone oficjalne wyniki nba 

@@ -223,9 +223,55 @@ informacji:
   wygrywających drużyn. Liczba zwycięstw to prosty, mocny sygnał kontekstowy, który koryguje
   sytuacje, gdy zawodnik z dobrymi liczbami gra w słabym zespole.
 
----
 
-## 4. Model
+
+
+## 4. Walidacja i ocena (scoring)
+
+Dodano funkcję oceniającą, która pozwala natychmiast zobaczyć skuteczność modelu. Dz
+
+### Walidacja krzyżowa Leave-One-Season-Out - funkcja `evaluate_logo`
+
+
+Podczas trenowanie modelu wykorzystana została walidacja krzyżowa **leave one group out** 
+Jest to schemat walidacji z biblioteki scikit-learn, w którym każdy
+  „fold” pomija **całą jedną grupę**. Jako grupy (`groups`) podajemy **sezony** (`SEASON`).
+  W efekcie w każdym foldzie model trenuje na wszystkich sezonach oprócz jednego i jest
+  testowany na tym jednym pominiętym sezonie.
+
+
+Ten schemat (a nie np. K-fold) został wybrany ponieważ dokładnie odwzorowuje on prawdziwe
+zadanie: przewidzieć sezon, którego model nigdy nie widział. Naturalną miarą jest też **pokrycie
+top-N**, a nie zwykła dokładność wiersz-po-wierszu - bo finalnie wybieramy stałą liczbę osób
+do drużyn.
+
+### Ocena predykcji końcowej - flaga `--score`
+
+Drugi tryb to **ocena predykcji** względem rzeczywistych etykiet ostatniego sezonu -
+uruchamiana przez dodanie flagi `--score` do `src/predict.py` według zasad w instruckji max 450. punktów, ponieważ branę pod uwagę są jedynie oficjalne wyniki NBA
+
+
+## 5. Niezbalansowanie klas: All-NBA vs All-Rookie
+
+Warto zwrócić uwagę na istotną różnicę w **proporcji klas** między oboma zadaniami, mimo że
+All-Rookie ma *mniej* zespołów 2 (10 osób) zamiast 3 (15 osób):
+
+- **All-NBA:** wybieranych jest 15 zawodników z całej ligi - czyli z puli rzędu 450+
+  zawodników w sezonie. Daje to bardzo mały odsetek pozytywów (proporcja ~31.5:1).
+- **All-Rookie:** wybieranych jest 10 zawodników, ale **wyłącznie spośród debiutantów** -
+  a tych grających na zauważalnym poziomie jest w sezonie zaledwie kilkudziesięciu. W efekcie
+  **stosunek liczby wybranych do liczby kandydatów jest dużo wyższy dla rookies** niż dla
+  All-NBA (proporcja ~7.2:1).
+
+
+Mimo że rookies mają tylko dwa zespoły zamiast trzech, ich pula kandydatów jest na
+tyle mała, że **niezbalansowanie klas dla modelu rookie jest znacznie łagodniejsze**. Ma to
+praktyczne konsekwencje: dynamicznie dobierany `scale_pos_weight` jest dla modelu rookie
+odpowiednio mniejszy. Statystyczne trafienie w jest też dużo wiekszę gdyż dla all-nba wynosi ono ~3% że wybierzemy dobrą osobe i jest 3 razy mniejsze jeżeli weźmiemy pod uwagę trafienie na dobre miejsce.
+
+
+
+## 6. Model
 
 ### Jak działa `XGBClassifier` (gradient boosting)
 
@@ -330,65 +376,66 @@ wiedzy dziedzinowej i interpretowalnością.
 
 ---
 
-## 5. Walidacja i ocena (scoring)
-
-Dodano funkcję oceniającą, która pozwala natychmiast zobaczyć skuteczność modelu. Działa ona
-dwojako.
-
-### Walidacja krzyżowa Leave-One-Season-Out - funkcja `evaluate_logo`
-
-Podczas rozwoju modelu stosowana jest **walidacja krzyżowa „leave-one-season-out”**
-zrealizowana funkcją:
-
-```python
-def evaluate_logo(X, y, groups, n_select: int, label: str):
-    logo = LeaveOneGroupOut()
-    ...
-```
-
-Działanie i znaczenie argumentów:
-
-- **`LeaveOneGroupOut`** to schemat walidacji z biblioteki scikit-learn, w którym każdy
-  „fold” pomija **całą jedną grupę**. Jako grupy (`groups`) podajemy **sezony** (`SEASON`).
-  W efekcie w każdym foldzie model trenuje na wszystkich sezonach oprócz jednego i jest
-  testowany na tym jednym pominiętym sezonie.
-- **`X`, `y`** - macierz cech i binarne etykiety (wybrany / niewybrany).
-- **`n_select`** - ile osób wybrać w pominiętym sezonie zgodnie z realnymi rozmiarami
-  zespołów: **15** dla All-NBA (3 piątki) i **10** dla All-Rookie (2 piątki). Dla każdego
-  pominiętego sezonu bierzemy top-`n_select` zawodników o najwyższym przewidzianym
-  prawdopodobieństwie i liczymy **pokrycie (overlap)** z faktycznie wybranymi zawodnikami w
-  tym sezonie.
-- **`label`** - etykieta opisowa (np. `"All-NBA"` / `"All-Rookie"`) używana wyłącznie do
-  czytelnego wypisywania wyników.
-
-**Dlaczego akurat taki schemat, a nie zwykły K-fold?** Bo dokładnie odwzorowuje on prawdziwe
-zadanie: przewidzieć sezon, którego model **nigdy nie widział**. Zwykły losowy podział mógłby
-umieścić zawodników z tego samego sezonu (a nawet sąsiednie sezony tego samego, silnie
-skorelowanego zawodnika) po obu stronach podziału, co zawyżałoby wynik przez „przeciek”
-informacji. Grupowanie po sezonie eliminuje ten problem. Naturalną miarą jest też **pokrycie
-top-N**, a nie zwykła dokładność wiersz-po-wierszu - bo finalnie wybieramy stałą liczbę osób
-do drużyn. Dla orientacji: losowy baseline trafia ~3%, a dobry model osiąga 60%+ pokrycia.
-
-### Ocena predykcji końcowej - flaga `--score`
-
-Drugi tryb to **ocena predykcji** względem rzeczywistych etykiet ostatniego sezonu -
-uruchamiana przez dodanie flagi `--score` do `src/predict.py` według zasad w instruckji max 450. punktów, ponieważ branę pod uwagę są jedynie oficjalne wyniki NBA
 
 
-## 6. Niezbalansowanie klas: All-NBA vs All-Rookie
 
-Warto zwrócić uwagę na istotną różnicę w **proporcji klas** między oboma zadaniami, mimo że
-All-Rookie ma *mniej* zespołów 2 (10 osób) zamiast 3 (15 osób):
 
-- **All-NBA:** wybieranych jest 15 zawodników z całej ligi - czyli z puli rzędu 450+
-  zawodników w sezonie. Daje to bardzo mały odsetek pozytywów (proporcja ~31.5:1).
-- **All-Rookie:** wybieranych jest 10 zawodników, ale **wyłącznie spośród debiutantów** -
-  a tych grających na zauważalnym poziomie jest w sezonie zaledwie kilkudziesięciu. W efekcie
-  **stosunek liczby wybranych do liczby kandydatów jest dużo wyższy dla rookies** niż dla
-  All-NBA (proporcja ~7.2:1).
+## 7. Podsumowanie 
 
-Innymi słowy: choć rookies mają tylko dwa zespoły zamiast trzech, ich pula kandydatów jest na
-tyle mała, że **niezbalansowanie klas dla modelu rookie jest znacznie łagodniejsze**. Ma to
-praktyczne konsekwencje: dynamicznie dobierany `scale_pos_weight` jest dla modelu rookie
-odpowiednio mniejszy, a samo „trafienie” jest statystycznie łatwiejsze niż w przypadku
-All-NBA (mniejsza i bardziej jednorodna pula kandydatów).
+W ramach projektu udało się z sukcesem zbudować i wdrożyć kompletny potok analityczny (pipeline) do predykcji nagród All-NBA oraz All-Rookie. Zrealizowano postawione cele, a kluczowe osiągnięcia i wnioski z projektu prezentują się następująco:
+
+    Zbudowanie skutecznego modelu predykcyjnego: Wdrożony model klasyfikacyjny oparty na algorytmie XGBoost (XGBClassifier) osiągnął wysoką skuteczność, poprawnie przewidując średnio 79,3% rzeczywistych wyborów NBA na przestrzeni 29 przebadanych sezonów (wynik potwierdzony rygorystyczną walidacją).
+
+    Odporność na zmiany epok w koszykówce: Jednym z największych sukcesów było zastosowanie transformacji percentylowej dla cech statystycznych. Dzięki temu rozwiązaniu model uniezależnił się od „inflacji punktów” i historycznych zmian w tempie gry, co pozwoliło na spójne porównywanie zawodników z różnych lat.
+
+    Wdrożenie wiedzy dziedzinowej do modelu: Sukcesem okazało się zastosowanie ograniczeń monotonicznych (monotonic constraints). Pozwoliło to wprost zakodować w modelu założenie, że lepsze statystyki nie mogą obniżać szans zawodnika. Skutecznie wyeliminowało to błędy algorytmu widoczne w fazie testów (np. zaniżanie oceny wybitnie podających wysokich zawodników, takich jak Nikola Jokić).
+
+    Realistyczna ocena wyników: Wykorzystanie walidacji krzyżowej Leave-One-Season-Out okazało się strzałem w dziesiątkę. Schemat ten idealnie symuluje realne warunki biznesowe (przewidywanie nagród dla nowego, niezakończonego jeszcze sezonu), co daje pewność, że wysokie wyniki modelu nie są efektem „przecieku danych” (data leakage).
+
+    Optymalny dobór narzędzi: Eksperymenty i testy ablacyjne (porównanie 7 wariantów modelu) udowodniły, że sukces w tego typu zadaniach zależy głównie od jakości cech i radzenia sobie z niezbalansowaniem klas, a wybrana konfiguracja XGBoost to najlepszy kompromis między wydajnością, interpretowalnością i precyzją.
+
+Podsumowując, projekt udowodnił, że dobór kilkunastu znormalizowanych statystyk połączony z klasycznym uczeniem maszynowym gradient boostingu potrafi z dużą dokładnością odtworzyć (i przewidzieć) skomplikowany, ludzki proces głosowania na najlepszych zawodników ligi.
+
+Czy chciałbyś, abym skompresował to podsumowanie do formy jednego krótkiego akapitu (np. jako abstrakt na sam początek raportu), czy taka rozbudowana forma w punktach najlepiej pasuje do formatu Twojej pracy?
+
+## 8. Porównanie wariantów modeli
+
+Aby sprawdzić, czy wybrana konfiguracja jest dobrym wyborem, porównano ją z kilkoma
+alternatywami. **Każdy wariant różni się tylko samym modelem/jego hiperparametrami** - zestaw
+17 cech, inżynieria percentylowa i schemat oceny pozostają identyczne. Wszystkie warianty
+oceniono tą samą walidacją **Leave-One-Season-Out** (średnia z 29 sezonów 1996-97 - 2024-25)
+oraz na odłożonym sezonie **2025-26**, według oficjalnej punktacji (maks. 450). Kod porównania
+znajduje się w katalogu `experiments/` (każdy wariant to osobny plik `exp_*.py`, wspólny rdzeń
+w `common.py`, wykresy generuje `plot_comparison.py`).
+
+Porównane warianty:
+
+- **final (chosen)** - finalna, wybrana konfiguracja: XGBoost, `max_depth=5`,
+  `learning_rate=0.05`, 300 drzew, ograniczenia monotoniczne, dynamiczny `scale_pos_weight`.
+- **shallow_fast** - płytsze drzewa (`max_depth=3`) i większy krok uczenia (`lr=0.10`),
+  200 drzew - szybszy, mniej podatny na przeuczenie model o mniejszej pojemności.
+- **deep_slow** - głębsze drzewa (`max_depth=8`), mały krok (`lr=0.02`), 800 drzew - większa
+  pojemność do modelowania interakcji między cechami.
+- **strong_reg** - silna regularyzacja (`reg_lambda=5`, `min_child_weight=5`, `gamma=1`,
+  `subsample`/`colsample=0.8`) - sprawdza, czy mocniejsze ograniczanie modelu lepiej generalizuje.
+- **no_class_weight** - jak finalny, ale `scale_pos_weight=1` (bez obsługi niezbalansowania) -
+  izoluje wartość dynamicznego ważenia klasy pozytywnej.
+- **xgb_no_monotone** - jak finalny, ale **bez ograniczeń monotonicznych** (ablacja) - pokazuje,
+  ile realnie wnoszą same ograniczenia monotoniczne.
+- **random_forest** - inna rodzina modeli (las losowy, 400 drzew, `class_weight="balanced"`);
+  nie wspiera ograniczeń monotonicznych.
+
+
+![Średnia liczba punktów na sezon](comparison_points.png)
+
+![Średnie pokrycie top-N z rzeczywistymi zespołami](comparison_overlap.png)
+
+**Wnioski.** Finalna konfiguracja wypada **najlepiej średnio** - zarówno w punktach (238/450),
+jak i w pokryciu (79,3%). Dwa warianty pozbawione ograniczeń monotonicznych (`xgb_no_monotone`
+i `random_forest`) mają **najniższe pokrycie**, co potwierdza wartość tych ograniczeń opisaną w
+sekcji 4. Różnice między wariantami są jednak **niewielkie** (wszystkie w przedziale ~227-238
+pkt) - ponieważ dzielą ten sam zestaw cech, to **cechy, a nie typ modelu, niosą większość
+sygnału**. Warto też zauważyć, że na **pojedynczym** sezonie 2025-26 `xgb_no_monotone` uzyskał
+331 > 322 - to jednak tylko jeden sezon; średnia z 29 sezonów jest miarą wiarygodniejszą i tam
+wygrywa konfiguracja finalna (dobrze ilustruje to, dlaczego nie należy dobierać modelu pod jeden
+sezon).

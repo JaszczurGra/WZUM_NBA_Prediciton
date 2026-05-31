@@ -120,7 +120,7 @@ def _bar_chart(names, values, ylabel, out_path, value_fmt="{:.0f}"):
                 value_fmt.format(v), ha="center", va="bottom", fontsize=10)
 
     fig.tight_layout()
-    fig.savefig(out_path, dpi=130)
+    fig.savefig(out_path, dpi=70)
     plt.close(fig)
 
 
@@ -139,7 +139,7 @@ def save_charts(df):
         pts_df["avg_pts"].tolist(),
         ylabel="average points per season (max 450)",
         out_path=os.path.join(RESULTS_DIR, "comparison_points.png"),
-        value_fmt="{:.0f}",
+        value_fmt="{:.1f}",
     )
     print(f"[ok] points chart  -> {os.path.relpath(os.path.join(RESULTS_DIR, 'comparison_points.png'), os.path.dirname(HERE))}")
 
