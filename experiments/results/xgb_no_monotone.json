@@ -1,0 +1,322 @@
+{
+  "name": "xgb_no_monotone",
+  "description": "Ablation: baseline XGB (depth=5, lr=0.05, 300 trees) with monotone constraints OFF.",
+  "params": {
+    "n_estimators": 300,
+    "max_depth": 5,
+    "learning_rate": 0.05
+  },
+  "pos_weight_policy": "balanced",
+  "n_features": 17,
+  "seed": 42,
+  "tasks": {
+    "all_nba": {
+      "n_teams": 3,
+      "team_size": 5,
+      "max_points_per_season": 270,
+      "n_seasons": 29,
+      "mean_points": 132.66,
+      "std_points": 17.27,
+      "mean_overlap": 0.7839,
+      "per_season": {
+        "1996-97": {
+          "points": 108,
+          "overlap": 0.7333
+        },
+        "1997-98": {
+          "points": 156,
+          "overlap": 0.7333
+        },
+        "1998-99": {
+          "points": 114,
+          "overlap": 0.8
+        },
+        "1999-00": {
+          "points": 142,
+          "overlap": 0.8
+        },
+        "2000-01": {
+          "points": 156,
+          "overlap": 0.9333
+        },
+        "2001-02": {
+          "points": 134,
+          "overlap": 0.8667
+        },
+        "2002-03": {
+          "points": 157,
+          "overlap": 0.8667
+        },
+        "2003-04": {
+          "points": 140,
+          "overlap": 0.8
+        },
+        "2004-05": {
+          "points": 121,
+          "overlap": 0.8
+        },
+        "2005-06": {
+          "points": 106,
+          "overlap": 0.7333
+        },
+        "2006-07": {
+          "points": 113,
+          "overlap": 0.7333
+        },
+        "2007-08": {
+          "points": 144,
+          "overlap": 0.8
+        },
+        "2008-09": {
+          "points": 123,
+          "overlap": 0.8
+        },
+        "2009-10": {
+          "points": 136,
+          "overlap": 0.6667
+        },
+        "2010-11": {
+          "points": 135,
+          "overlap": 0.8
+        },
+        "2011-12": {
+          "points": 135,
+          "overlap": 0.8
+        },
+        "2012-13": {
+          "points": 133,
+          "overlap": 0.8
+        },
+        "2013-14": {
+          "points": 89,
+          "overlap": 0.6667
+        },
+        "2014-15": {
+          "points": 155,
+          "overlap": 0.8667
+        },
+        "2015-16": {
+          "points": 126,
+          "overlap": 0.8
+        },
+        "2016-17": {
+          "points": 127,
+          "overlap": 0.7333
+        },
+        "2017-18": {
+          "points": 134,
+          "overlap": 0.7333
+        },
+        "2018-19": {
+          "points": 138,
+          "overlap": 0.8667
+        },
+        "2019-20": {
+          "points": 127,
+          "overlap": 0.7333
+        },
+        "2020-21": {
+          "points": 108,
+          "overlap": 0.6667
+        },
+        "2021-22": {
+          "points": 137,
+          "overlap": 0.8
+        },
+        "2022-23": {
+          "points": 142,
+          "overlap": 0.8
+        },
+        "2023-24": {
+          "points": 162,
+          "overlap": 0.8
+        },
+        "2024-25": {
+          "points": 149,
+          "overlap": 0.8
+        }
+      }
+    },
+    "all_rookie": {
+      "n_teams": 2,
+      "team_size": 5,
+      "max_points_per_season": 180,
+      "n_seasons": 29,
+      "mean_points": 96.07,
+      "std_points": 22.44,
+      "mean_overlap": 0.7586,
+      "per_season": {
+        "1996-97": {
+          "points": 101,
+          "overlap": 0.8
+        },
+        "1997-98": {
+          "points": 93,
+          "overlap": 0.7
+        },
+        "1998-99": {
+          "points": 101,
+          "overlap": 0.8
+        },
+        "1999-00": {
+          "points": 116,
+          "overlap": 0.9
+        },
+        "2000-01": {
+          "points": 120,
+          "overlap": 0.8
+        },
+        "2001-02": {
+          "points": 93,
+          "overlap": 0.7
+        },
+        "2002-03": {
+          "points": 81,
+          "overlap": 0.7
+        },
+        "2003-04": {
+          "points": 150,
+          "overlap": 0.9
+        },
+        "2004-05": {
+          "points": 115,
+          "overlap": 0.7
+        },
+        "2005-06": {
+          "points": 97,
+          "overlap": 0.9
+        },
+        "2006-07": {
+          "points": 109,
+          "overlap": 0.9
+        },
+        "2007-08": {
+          "points": 96,
+          "overlap": 0.8
+        },
+        "2008-09": {
+          "points": 82,
+          "overlap": 0.8
+        },
+        "2009-10": {
+          "points": 108,
+          "overlap": 0.8
+        },
+        "2010-11": {
+          "points": 93,
+          "overlap": 0.7
+        },
+        "2011-12": {
+          "points": 104,
+          "overlap": 0.9
+        },
+        "2012-13": {
+          "points": 130,
+          "overlap": 0.8
+        },
+        "2013-14": {
+          "points": 58,
+          "overlap": 0.5
+        },
+        "2014-15": {
+          "points": 81,
+          "overlap": 0.7
+        },
+        "2015-16": {
+          "points": 96,
+          "overlap": 0.8
+        },
+        "2016-17": {
+          "points": 74,
+          "overlap": 0.7
+        },
+        "2017-18": {
+          "points": 78,
+          "overlap": 0.6
+        },
+        "2018-19": {
+          "points": 80,
+          "overlap": 0.6
+        },
+        "2019-20": {
+          "points": 60,
+          "overlap": 0.7
+        },
+        "2020-21": {
+          "points": 116,
+          "overlap": 0.9
+        },
+        "2021-22": {
+          "points": 136,
+          "overlap": 1.0
+        },
+        "2022-23": {
+          "points": 93,
+          "overlap": 0.7
+        },
+        "2023-24": {
+          "points": 58,
+          "overlap": 0.5
+        },
+        "2024-25": {
+          "points": 67,
+          "overlap": 0.7
+        }
+      }
+    }
+  },
+  "combined": {
+    "max_points_per_season": 450,
+    "n_seasons": 29,
+    "mean_points": 228.72,
+    "std_points": 28.06,
+    "per_season": {
+      "1996-97": 209,
+      "1997-98": 249,
+      "1998-99": 215,
+      "1999-00": 258,
+      "2000-01": 276,
+      "2001-02": 227,
+      "2002-03": 238,
+      "2003-04": 290,
+      "2004-05": 236,
+      "2005-06": 203,
+      "2006-07": 222,
+      "2007-08": 240,
+      "2008-09": 205,
+      "2009-10": 244,
+      "2010-11": 228,
+      "2011-12": 239,
+      "2012-13": 263,
+      "2013-14": 147,
+      "2014-15": 236,
+      "2015-16": 222,
+      "2016-17": 201,
+      "2017-18": 212,
+      "2018-19": 218,
+      "2019-20": 187,
+      "2020-21": 224,
+      "2021-22": 273,
+      "2022-23": 235,
+      "2023-24": 220,
+      "2024-25": 216
+    }
+  },
+  "current_season": {
+    "season": "2025-26",
+    "all_nba": {
+      "points": 151,
+      "max_points": 270
+    },
+    "all_rookie": {
+      "points": 180,
+      "max_points": 180
+    },
+    "combined": {
+      "points": 331,
+      "max_points": 450
+    }
+  },
+  "runtime_sec": 16.2,
+  "timestamp": "2026-05-31T22:31:41"
+}

@@ -1,14 +1,14 @@
 ![Politechnika Poznańska Logo](https://ankiety.put.poznan.pl/images/logo.png)
 
 
-<h1>Wybrane zagadnienia uczenia maszynowego <br>Raport — Predykcja nagród NBA (All-NBA i All-Rookie)</h1>
+<h1>Wybrane zagadnienia uczenia maszynowego <br>Raport - Predykcja nagród NBA (All-NBA i All-Rookie)</h1>
 <h2> Prowadzący: dr inż. Michał Fularz
 
 Autorstwa: Julian Mikołajczak</h2>
 
 <!-- Projekt rozwiązuje zadanie przewidzenia, którzy zawodnicy NBA zostaną wybrani do -->
-<!-- zespołów **All-NBA** (First / Second / Third Team — łącznie 15 zawodników) oraz -->
-<!-- **All-Rookie** (First / Second Team — łącznie 10 zawodników) w sezonie **2025-26**. -->
+<!-- zespołów **All-NBA** (First / Second / Third Team - łącznie 15 zawodników) oraz -->
+<!-- **All-Rookie** (First / Second Team - łącznie 10 zawodników) w sezonie **2025-26**. -->
 <!--  -->
 <!-- Problem potraktowano jako **zadanie rankingowe**: trenowany jest klasyfikator binarny -->
 <!-- (wybrany vs. niewybrany), a następnie wszyscy zawodnicy są sortowani według -->
@@ -18,15 +18,15 @@ Autorstwa: Julian Mikołajczak</h2>
 
 ## 0. Uruchomienie projektu 
 
-**Krok 1 — instalacja zależności.** Wszystkie wymagane biblioteki znajdują się w pliku
+**Krok 1 - instalacja zależności.** Wszystkie wymagane biblioteki znajdują się w pliku
 `requirements.txt`:
 
 ```
 pip install -r requirements.txt
 ```
 
-**Krok 2 — pobranie danych.** 
-Dane zostały dołączone do projektu jakoże waża tylko 5MB a fetchowanie zajmuje około 8min jednak żeby przetestować skrypt ich pobierania można je śmiało usunąć i pobrać na nowo w tym przypadku najpierw pobierane będą etykiety nagród (scraping z Basketball
+**Krok 2 - pobranie danych.** 
+Dane zostały dołączone do projektu ale można je wygenerować na nowo. W tym przypadku najpierw pobierane będą etykiety nagród (scraping z Basketball
 Reference), a następnie statystyki zawodników (z NBA API). Oba skrypty zapisują pliki CSV do
 `data/raw/`:
 
@@ -35,23 +35,23 @@ python data/collect_awards.py
 python data/collect_stats.py
 ```
 
-**Krok 3 — trening modeli.** Trening wczytuje dane historyczne, buduje cechy i zapisuje dwa
+**Krok 3 - trening modeli.** Trening wczytuje dane historyczne, buduje cechy i zapisuje dwa
 modele jeden wyspecjalizowany w wyberianiu z wszystkich zawodnikow a drugi tylko z rookies (`models/allnba_model.pkl`, `models/rookie_model.pkl`):
 
 ```
 python src/train.py
 ```
 
-**Krok 4 — predykcja.** Predykcja dla najnowszego sezonu zapisywana jest do pliku
+**Krok 4 - predykcja.** Predykcja dla najnowszego sezonu zapisywana jest do pliku
 wyjściowego ścieżka jet pierwszym argumentem:
 
 ```
 python src/predict.py output.json
 ```
 
-Dodanie flagi `--score` powoduje dodatkowe **porównanie predykcji z rzeczywistymi
-etykietami** ostatniego sezonu i wypisanie liczby punktów według oficjalnej punktacji
-zadania — ułatwiło to szybkie porównywanie kolejnych wersji modelu:
+Dodanie flagi `--score` powoduje dodatkowe porównanie predykcji z rzeczywistymi
+wynikami sezonu ogłoszonymi przez NBA i wypisanie liczby punktów według punktacji
+zadania - ułatwiło to szybkie porównywanie kolejnych wersji modelu
 
 ---
 
@@ -98,8 +98,8 @@ Każdy zawodnik dostaje etykietę `tier`:
 
 Dane są dzielone na dwie części:
 
-- **historyczne** (wszystkie sezony oprócz najnowszego) — do treningu,
-- **bieżące** (najnowszy sezon) — do oceny (`allnba_labels_current.csv`,
+- **historyczne** (wszystkie sezony oprócz najnowszego) - do treningu,
+- **bieżące** (najnowszy sezon) - do oceny (`allnba_labels_current.csv`,
   `allrookie_labels_current.csv`).
 
 ---
@@ -115,25 +115,26 @@ Nazwy zawodników są normalizowane do UTF-8 i dopasowywane do statystyk po kluc
 poprawnie łączyły się ze swoimi etykietami, zamiast być po cichu pomijane wśród przykładów
 pozytywnych.
 
-### Pola już procentowe (zakres 0–1) — pozostają niezmienione
+### Pola już procentowe
 
-Te statystyki są z natury ułamkami/odsetkami, więc są już porównywalne między sezonami i
-zawodnikami — nie ma potrzeby ich przekształcać.
+Są w zakresie od 0-1 reprezntując wartości procentowe, zostają niezmienione
 
 | Pole      | Znaczenie                                                                             |
 | --------- | ------------------------------------------------------------------------------------- |
-| `FG_PCT`  | Skuteczność rzutów z gry (Field Goal %) — trafione / oddane rzuty z gry               |
+| `FG_PCT`  | Skuteczność rzutów z gry (Field Goal %) - trafione / oddane rzuty z gry               |
 | `FG3_PCT` | Skuteczność rzutów za 3 punkty (3-Point %)                                            |
 | `FT_PCT`  | Skuteczność rzutów wolnych (Free Throw %)                                             |
-| `TS_PCT`  | True Shooting % — łączna skuteczność rzutowa uwzględniająca rzuty z gry, za 3 i wolne |
-| `USG_PCT` | Usage Rate — odsetek akcji drużyny kończonych przez zawodnika, gdy jest na parkiecie  |
-| `AST_PCT` | Assist % — odsetek koszy kolegów z drużyny zaliczonych po asyście zawodnika           |
-| `REB_PCT` | Rebound % — odsetek dostępnych zbiórek schwytanych przez zawodnika                    |
+| `TS_PCT`  | True Shooting % - łączna skuteczność rzutowa uwzględniająca rzuty z gry, za 3 i wolne |
+| `USG_PCT` | Usage Rate - odsetek akcji drużyny kończonych przez zawodnika, gdy jest na parkiecie  |
+| `AST_PCT` | Assist % - odsetek koszy kolegów z drużyny zaliczonych po asyście zawodnika           |
+| `REB_PCT` | Rebound % - odsetek dostępnych zbiórek schwytanych przez zawodnika                    |
 
-### Pola spoza zakresu 0–1 — rankingowane jako percentyl względem aktualnego sezonu
+### Pola rankingowane jako percentyl względem aktualnego sezonu
 
 Te wartości mają różne, nieograniczone skale (np. punkty per game vs. liczba zwycięstw
-drużyny), dlatego są przekształcane na percentyl w obrębie sezonu. Dla każdego powstaje
+drużyny), dlatego są przekształcane na percentyl. Dlatego że ranking liczony jest **per sezon**, cechy są porównywalne między epokami i
+niezależne od ogólnego poziomu/tempa gry w danym roku (np. inflacja punktów we współczesnej
+NBA nie zaburza modelu). Dla każdego powstaje
 cecha `{nazwa}_pctile`.
 
 | Pole         | Znaczenie                                                               |
@@ -146,62 +147,44 @@ cecha `{nazwa}_pctile`.
 | `GP`         | Liczba rozegranych meczów (Games Played)                                |
 | `MIN`        | Minuty na mecz (Minutes per game)                                       |
 | `NET_RATING` | Różnica punktów drużyny na 100 posiadań, gdy zawodnik jest na parkiecie |
-| `PIE`        | Player Impact Estimate — szacowany całościowy wkład zawodnika w grę     |
+| `PIE`        | Player Impact Estimate - szacowany całościowy wkład zawodnika w grę     |
 | `TEAM_WINS`  | Liczba zwycięstw drużyny zawodnika w sezonie                            |
 
-### Jak działa percentyl
 
-Percentyl liczony jest osobno w obrębie każdego sezonu:
+### Dlaczego własny percentyl, a nie gotowe kolumny `*_RANK` z API
 
-```
-df[f"{col}_pctile"] = df.groupby("SEASON")[col].rank(pct=True)
-```
+NBA API zwraca wprawdzie gotowe kolumny rankingowe (`PTS_RANK`, `REB_RANK`, …), ale są one
+bezwzględną pozycją (1, 2, … N) o orientacji odwrotnej (1 = najlepszy). Liczba zawodników
+N rośnie z sezonu na sezon (od ok. 440 w 1998-99 do 582 w 2025-26), więc surowy ranking nie
+jest porównywalny między epokami i ma kierunek przeciwny do reszty cech („wyżej = lepiej”).
 
-Dla danej kolumny i danego sezonu wszyscy zawodnicy są ustawiani w kolejności od najmniejszej
-do największej wartości, a następnie ich pozycja w tym rankingu jest przeliczana na ułamek z
-zakresu **0–1** (`pct=True`). Oznacza to:
+Co najważniejsze, `TEAM_WINS` pochodzi z innego endpointu (`LeagueStandingsV3`) i w ogóle
+nie ma gotowego rankingu - tę cechę trzeba więc i tak zrankingować samodzielnie. A nawet
+gdybyśmy chcieli skorzystać z gotowych kolumn, trzeba by je odwrócić i znormalizować przez
+liczbę graczy - czyli ręcznie odtworzyć dokładnie to, co robi percentyl. Dlatego prościej
+i spójniej jest policzyć go samodzielnie, jednolicie dla wszystkich 10 pól.
 
-- wartość **1.0** → najlepszy zawodnik w danym sezonie pod względem tej statystyki,
-- wartość **0.5** → mediana (połowa zawodników ma mniej, połowa więcej),
-- wartość **bliska 0** → jedna z najniższych wartości w sezonie.
+### Dodatkowo
 
-Przykład: jeśli w sezonie 2010-11 zawodnik zdobywał 28 PTS/mecz i był to drugi najwyższy
-wynik spośród 400 zawodników, jego `PTS_pctile` wyniesie ok. 0.9975.
+Na podstawie roku debiutu wyznaczana jest flaga `is_rookie` (przetwarzany sezon == rok
+  debiutu), która ułatwia potem implementacje ucznia modelu dla debiutantów
 
-Dzięki temu, że ranking liczony jest **per sezon**, cechy są porównywalne między epokami i
-niezależne od ogólnego poziomu/tempa gry w danym roku (np. inflacja punktów we współczesnej
-NBA nie zaburza modelu) — liczy się **pozycja względem rówieśników**, a nie surowa liczba.
+Brakujące wartości są uzupełniane zerem,
 
-Dodatkowo:
-
-- na podstawie roku debiutu wyznaczana jest flaga `is_rookie` (przetwarzany sezon == rok
-  debiutu),
-- brakujące wartości są uzupełniane zerem,
-- etykiety dołączane są po znormalizowanej nazwie zawodnika, a problem klasyfikacji sprowadzono do binarnego: wybrany (dowolny
-  tier) vs. niewybrany.
+Etykiety dołączane są po znormalizowanej nazwie zawodnika, a problem klasyfikacji sprowadzono do binarnego: wybrany (dowolny tier) vs. niewybrany.
 
 ---
 
-## 3. Cechy wykorzystane do uczenia — ile i dlaczego
+## 3. Cechy wykorzystane do uczenia
 
-### Czy wszystkie pobrane kolumny trafiają do modelu?
 
-**Nie.** Endpointy NBA API (`LeagueDashPlayerStats` w wariancie *traditional* oraz
-*advanced*) zwracają **kilkadziesiąt kolumn** na zawodnika — oprócz samych statystyk także
+ Endpointy NBA API (`LeagueDashPlayerStats` w wariancie *traditional* oraz
+*advanced*) zwracają **kilkadziesiąt kolumn** na zawodnika - oprócz samych statystyk także
 identyfikatory (`PLAYER_ID`, `TEAM_ID`, `PLAYER_NAME`), kolumny pomocnicze oraz cały komplet
 kolumn rankingowych `*_RANK` generowanych automatycznie przez API (co praktycznie podwaja
-liczbę kolumn). Po odrzuceniu:
+liczbę kolumn). Po odrzuceniu kolumn rankingowych, identfikatorów, nazw oraz  składowych redundantnych względem wskaźników skuteczności (np. `FGM`/`FGA`,
+  `FTM`/`FTA` - ich treść zawiera się już w `FG_PCT`, `FT_PCT`, `TS_PCT`) zostaje **17 cech** które są wypisane w sekcji 2.
 
-- identyfikatorów i nazw (nie niosą informacji predykcyjnej),
-- kolumn `*_RANK` (są zbędne — własny percentyl liczymy sami w sposób kontrolowany),
-- surowych składowych redundantnych względem wskaźników skuteczności (np. `FGM`/`FGA`,
-  `FTM`/`FTA` — ich treść zawiera się już w `FG_PCT`, `FT_PCT`, `TS_PCT`),
-
-do modelu trafia ostatecznie **17 cech**. Są to dokładnie te pola wypisane w sekcji 2:
-**7 pól procentowych** (`FG_PCT`, `FG3_PCT`, `FT_PCT`, `TS_PCT`, `USG_PCT`, `AST_PCT`,
-`REB_PCT`) używanych bez zmian oraz **10 pól** (`PTS`, `REB`, `AST`, `STL`, `BLK`, `GP`,
-`MIN`, `NET_RATING`, `PIE`, `TEAM_WINS`) przekształconych na percentyl sezonowy. Wypisane
-pola to więc **kompletny, finalny zestaw cech**, a nie tylko ich podzbiór.
 
 ### Dlaczego wybrano akurat te statystyki
 
@@ -211,11 +194,11 @@ informacji:
 
 - **Produkcja (box score): `PTS`, `REB`, `AST`, `STL`, `BLK`.** Podstawowe liczby, które
   definują „wielkość” sezonu zawodnika. To pierwsze, co widzą głosujący, i historycznie
-  najsilniejszy sygnał — gwiazdy All-NBA prawie zawsze są w czołówce co najmniej kilku z tych
+  najsilniejszy sygnał - gwiazdy All-NBA prawie zawsze są w czołówce co najmniej kilku z tych
   kategorii. `STL` i `BLK` dodatkowo wnoszą wymiar **defensywny**, którego nie widać w
   punktach.
 
-- **Skuteczność: `FG_PCT`, `FG3_PCT`, `FT_PCT`, `TS_PCT`.** Same punkty nie wystarczą —
+- **Skuteczność: `FG_PCT`, `FG3_PCT`, `FT_PCT`, `TS_PCT`.** Same punkty nie wystarczą -
   liczy się też, *jak efektywnie* zawodnik je zdobywa. `TS_PCT` jest tu kluczowy, bo łączy
   rzuty z gry, za 3 i wolne w jeden wskaźnik jakości rzutowej. Pozwala to odróżnić
   wartościowego, efektywnego strzelca od zawodnika, który „nabija” punkty dużą liczbą
@@ -228,7 +211,7 @@ informacji:
 
 - **Wpływ całościowy: `NET_RATING`, `PIE`.** Pojedyncze wskaźniki „syntetyczne”, które
   próbują uchwycić łączny wpływ zawodnika na grę po obu stronach parkietu. Stanowią uzupełnienie
-  surowego box score — pomagają docenić zawodników wartościowych w sposób, którego nie widać
+  surowego box score - pomagają docenić zawodników wartościowych w sposób, którego nie widać
   w pojedynczych kategoriach.
 
 - **Dostępność: `GP`, `MIN`.** Głosujący karzą zawodników, którzy opuścili dużą część sezonu
@@ -240,13 +223,6 @@ informacji:
   wygrywających drużyn. Liczba zwycięstw to prosty, mocny sygnał kontekstowy, który koryguje
   sytuacje, gdy zawodnik z dobrymi liczbami gra w słabym zespole.
 
-Krótko mówiąc: zestaw cech łączy **ile** zawodnik produkuje (box score), **jak efektywnie**
-(skuteczność), **jak ważny jest dla zespołu** (rola), **jaki ma łączny wpływ** (wskaźniki
-syntetyczne), **jak często gra** (dostępność) oraz **w jak dobrym jest zespole** (sukces
-drużyny). Pominięto natomiast kolumny, które albo nie niosą sygnału (identyfikatory), albo są
-redundantne (surowe składowe rzutów, gotowe kolumny `*_RANK`), aby ograniczyć szum i
-współliniowość cech.
-
 ---
 
 ## 4. Model
@@ -254,14 +230,14 @@ współliniowość cech.
 ### Jak działa `XGBClassifier` (gradient boosting)
 
 Model to **XGBoost** w wariancie klasyfikacji binarnej (`XGBClassifier`). XGBoost należy do
-rodziny **gradient boosted trees** — buduje **zespół (ensemble) płytkich drzew decyzyjnych
+rodziny **gradient boosted trees** - buduje **zespół (ensemble) płytkich drzew decyzyjnych
 dodawanych po kolei**, gdzie każde kolejne drzewo uczy się poprawiać błędy całego dotychczasowego
 zespołu:
 
 1. Model startuje od prostej predykcji bazowej (np. stałego logarytmu szansy klasy
    pozytywnej).
 2. Liczony jest **gradient funkcji straty** (tutaj `logloss`, czyli binarna entropia
-   krzyżowa) — czyli kierunek, w którym należy poprawić predykcję dla każdego przykładu.
+   krzyżowa) - czyli kierunek, w którym należy poprawić predykcję dla każdego przykładu.
 3. Dopasowywane jest **nowe drzewo**, które przewiduje ten gradient (intuicyjnie: „gdzie i o
    ile model się myli”).
 4. Predykcja drzewa jest dodawana do zespołu, przeskalowana przez **`learning_rate`** (małe
@@ -272,26 +248,26 @@ Końcowa predykcja to suma „wkładów” wszystkich drzew, przepuszczona przez
 do postaci **prawdopodobieństwa** `P(zawodnik zostanie wybrany)`. To prawdopodobieństwo jest
 właśnie wartością, według której rankingujemy zawodników. Drzewa potrafią wychwytywać
 **nieliniowe progi i interakcje** między cechami (np. „wysoki `USG_PCT` *i* jednocześnie
-wysoki `TS_PCT`” jest dużo lepszym sygnałem niż każda z tych cech z osobna) — czego model
+wysoki `TS_PCT`” jest dużo lepszym sygnałem niż każda z tych cech z osobna) - czego model
 liniowy nie uchwyciłby bez ręcznego dodawania interakcji.
 
 ### Konfiguracja modelu
 
-Trening (`src/train.py`) odbywa się na **wszystkich sezonach oprócz ostatniego** — ostatni
+Trening (`src/train.py`) odbywa się na **wszystkich sezonach oprócz ostatniego** - ostatni
 sezon (`2025-26`) jest pomijany przy wczytywaniu danych i służy do predykcji. Użyto
 następującej konfiguracji:
 
-- `n_estimators=300` — liczba kolejno dodawanych drzew,
-- `max_depth=5` — maksymalna głębokość pojedynczego drzewa (płytkie drzewa ograniczają
+- `n_estimators=300` - liczba kolejno dodawanych drzew,
+- `max_depth=5` - maksymalna głębokość pojedynczego drzewa (płytkie drzewa ograniczają
   przeuczenie),
-- `learning_rate=0.05` — niewielki krok uczenia,
-- `scale_pos_weight` — ustawiany **dynamicznie** na podstawie proporcji klas (patrz niżej),
+- `learning_rate=0.05` - niewielki krok uczenia,
+- `scale_pos_weight` - ustawiany **dynamicznie** na podstawie proporcji klas (patrz niżej),
 - `eval_metric="logloss"`, `random_state=42` (powtarzalność wyników).
 
 Trenowane są **dwa osobne modele** na tym samym zestawie cech:
 
-- **All-NBA** — na pełnym zbiorze zawodników,
-- **All-Rookie** — wyłącznie na wierszach z flagą `is_rookie`.
+- **All-NBA** - na pełnym zbiorze zawodników,
+- **All-Rookie** - wyłącznie na wierszach z flagą `is_rookie`.
 
 Modele zapisywane są do `models/allnba_model.pkl` oraz `models/rookie_model.pkl`.
 
@@ -302,10 +278,10 @@ Każda cecha jest ograniczona tak, aby przewidywane prawdopodobieństwo wyboru b
 „wyżej = lepiej” (percentyle i wskaźniki skuteczności), koduje to jedno proste, dziedzinowo
 neutralne założenie: **więcej produkcji nigdy nie obniża oceny zawodnika.**
 
-To standardowa regularyzacja — działa jednolicie przez cechy i **nie wskazuje, nie waży ani
+To standardowa regularyzacja - działa jednolicie przez cechy i **nie wskazuje, nie waży ani
 nie wybiera ręcznie żadnego konkretnego zawodnika**; model nadal dokonuje całego wyboru
 samodzielnie. Ograniczenie okazało się potrzebne, bo model bez niego nauczył się **odwrotnej,
-fałszywej zależności** — wysoki `REB_PCT` i `AST_PCT` (które historycznie korelują z
+fałszywej zależności** - wysoki `REB_PCT` i `AST_PCT` (które historycznie korelują z
 „rolowymi” wysokimi zawodnikami spoza ścisłej czołówki) traktował jako sygnał *negatywny*, co
 „zakopywało” naprawdę wybitnych, grających na rozegraniu wysokich, takich jak Nikola Jokić.
 Dodanie ograniczenia koryguje to bez żadnej ręcznej interwencji i poprawia trafność w walidacji
@@ -313,7 +289,7 @@ krzyżowej między sezonami.
 
 ### Dlaczego wybrano właśnie ten model (szczegółowo)
 
-Wybór gradient boosting / XGBoost nie jest przypadkowy — wynika z charakteru danych i zadania:
+Wybór gradient boosting / XGBoost nie jest przypadkowy - wynika z charakteru danych i zadania:
 
 1. **Dane tabelaryczne o mieszanych skalach i z interakcjami.** Mamy ~17 heterogenicznych
    cech (percentyle, odsetki, wskaźniki syntetyczne). Zespoły drzew są od lat
@@ -321,16 +297,16 @@ Wybór gradient boosting / XGBoost nie jest przypadkowy — wynika z charakteru 
    interakcjami bez ręcznej inżynierii (czego wymagałaby np. regresja logistyczna).
 
 2. **Silne niezbalansowanie klas.** Wybranych zawodników jest bardzo mało w stosunku do
-   wszystkich (dla All-NBA ok. 15 na ~450+ zawodników w sezonie, czyli rzędu 3% — proporcja
+   wszystkich (dla All-NBA ok. 15 na ~450+ zawodników w sezonie, czyli rzędu 3% - proporcja
    ok. 33:1). XGBoost obsługuje to natywnie parametrem `scale_pos_weight`, który skaluje
    wkład klasy pozytywnej w gradiencie, dzięki czemu model nie ignoruje rzadkich pozytywów.
 
-3. **Wsparcie dla ograniczeń monotonicznych.** To kluczowa, rzadka cecha — pozwoliła wprost
+3. **Wsparcie dla ograniczeń monotonicznych.** To kluczowa, rzadka cecha - pozwoliła wprost
    zakodować założenie „wyżej = lepiej” i naprawić problem z Jokiciem (patrz wyżej). Niewiele
    rodzin modeli udostępnia tak czyste, wbudowane ograniczenia monotoniczne.
 
 4. **Odporność i niewielki preprocessing.** Drzewa są niewrażliwe na skalę cech i odstające
-   wartości — nie wymagają standaryzacji ani usuwania outlierów. Percentyl liczymy z innego
+   wartości - nie wymagają standaryzacji ani usuwania outlierów. Percentyl liczymy z innego
    powodu (porównywalność między sezonami), a nie dlatego, że model tego wymaga.
 
 5. **Interpretowalność.** Można odczytać **ważność cech** (feature importance), co jest cenne
@@ -340,7 +316,7 @@ Wybór gradient boosting / XGBoost nie jest przypadkowy — wynika z charakteru 
    pasuje do sformułowania zadania jako rankingu top-N.
 
 7. **Ograniczenie projektowe.** Zadanie zakładało **niekorzystanie z głębokich sieci
-   neuronowych** — XGBoost spełnia ten warunek, oferując przy tym bardzo dobrą skuteczność na
+   neuronowych** - XGBoost spełnia ten warunek, oferując przy tym bardzo dobrą skuteczność na
    danych tej wielkości (przy zaledwie tysiącach obserwacji głębokie sieci i tak zwykle
    przegrywają z boostingiem).
 
@@ -359,7 +335,7 @@ wiedzy dziedzinowej i interpretowalnością.
 Dodano funkcję oceniającą, która pozwala natychmiast zobaczyć skuteczność modelu. Działa ona
 dwojako.
 
-### Walidacja krzyżowa Leave-One-Season-Out — funkcja `evaluate_logo`
+### Walidacja krzyżowa Leave-One-Season-Out - funkcja `evaluate_logo`
 
 Podczas rozwoju modelu stosowana jest **walidacja krzyżowa „leave-one-season-out”**
 zrealizowana funkcją:
@@ -376,13 +352,13 @@ Działanie i znaczenie argumentów:
   „fold” pomija **całą jedną grupę**. Jako grupy (`groups`) podajemy **sezony** (`SEASON`).
   W efekcie w każdym foldzie model trenuje na wszystkich sezonach oprócz jednego i jest
   testowany na tym jednym pominiętym sezonie.
-- **`X`, `y`** — macierz cech i binarne etykiety (wybrany / niewybrany).
-- **`n_select`** — ile osób wybrać w pominiętym sezonie zgodnie z realnymi rozmiarami
+- **`X`, `y`** - macierz cech i binarne etykiety (wybrany / niewybrany).
+- **`n_select`** - ile osób wybrać w pominiętym sezonie zgodnie z realnymi rozmiarami
   zespołów: **15** dla All-NBA (3 piątki) i **10** dla All-Rookie (2 piątki). Dla każdego
   pominiętego sezonu bierzemy top-`n_select` zawodników o najwyższym przewidzianym
   prawdopodobieństwie i liczymy **pokrycie (overlap)** z faktycznie wybranymi zawodnikami w
   tym sezonie.
-- **`label`** — etykieta opisowa (np. `"All-NBA"` / `"All-Rookie"`) używana wyłącznie do
+- **`label`** - etykieta opisowa (np. `"All-NBA"` / `"All-Rookie"`) używana wyłącznie do
   czytelnego wypisywania wyników.
 
 **Dlaczego akurat taki schemat, a nie zwykły K-fold?** Bo dokładnie odwzorowuje on prawdziwe
@@ -390,70 +366,29 @@ zadanie: przewidzieć sezon, którego model **nigdy nie widział**. Zwykły loso
 umieścić zawodników z tego samego sezonu (a nawet sąsiednie sezony tego samego, silnie
 skorelowanego zawodnika) po obu stronach podziału, co zawyżałoby wynik przez „przeciek”
 informacji. Grupowanie po sezonie eliminuje ten problem. Naturalną miarą jest też **pokrycie
-top-N**, a nie zwykła dokładność wiersz-po-wierszu — bo finalnie wybieramy stałą liczbę osób
+top-N**, a nie zwykła dokładność wiersz-po-wierszu - bo finalnie wybieramy stałą liczbę osób
 do drużyn. Dla orientacji: losowy baseline trafia ~3%, a dobry model osiąga 60%+ pokrycia.
 
-### Ocena predykcji końcowej — flaga `--score`
+### Ocena predykcji końcowej - flaga `--score`
 
-Drugi tryb to **ocena predykcji** względem rzeczywistych etykiet ostatniego sezonu —
-uruchamiana przez dodanie flagi `--score`:
+Drugi tryb to **ocena predykcji** względem rzeczywistych etykiet ostatniego sezonu -
+uruchamiana przez dodanie flagi `--score` do `src/predict.py` według zasad w instruckji max 450. punktów, ponieważ branę pod uwagę są jedynie oficjalne wyniki NBA
 
-```
-python src/predict.py output.json --score
-```
 
-Punktacja (maks. **900**) premiuje trafienie zawodnika w danym tierze: **10 pkt** za dokładny
-tier, **8 pkt** przy różnicy o 1, **6 pkt** przy różnicy o 2, plus bonus za liczbę dokładnych
-trafień w drużynie (2→5, 3→10, 4→20, 5→40 pkt). Pozwala to liczbowo i powtarzalnie
-porównywać kolejne wersje modelu zgodnie z instrukcją zadania.
-
----
-
-## 6. Predykcja (sezon 2025-26)
-
-Dla najnowszego sezonu pipeline wygląda następująco:
-
-1. Wczytywane są statystyki bieżącego sezonu (stan na koniec sezonu zasadniczego).
-2. Liczone są te same cechy, z **percentylem normalizowanym w obrębie sezonu 2025-26**.
-3. Model **All-NBA** ocenia wszystkich zawodników; **15** z najwyższym prawdopodobieństwem
-   zapełnia trzy zespoły (1–5 / 6–10 / 11–15).
-4. Model **All-Rookie** ocenia wyłącznie debiutantów; **10** najlepszych zapełnia dwa zespoły
-   rookie.
-
-Debiutanci są identyfikowani przez zestawienie roku debiutu każdego zawodnika (z
-`CommonPlayerInfo`) z rokiem bieżącego sezonu.
-
----
-
-## 7. Niezbalansowanie klas: All-NBA vs All-Rookie
+## 6. Niezbalansowanie klas: All-NBA vs All-Rookie
 
 Warto zwrócić uwagę na istotną różnicę w **proporcji klas** między oboma zadaniami, mimo że
-All-Rookie ma *mniej* zespołów (2 zamiast 3) i *mniej* wybieranych osób (10 zamiast 15):
+All-Rookie ma *mniej* zespołów 2 (10 osób) zamiast 3 (15 osób):
 
-- **All-NBA:** wybieranych jest 15 zawodników z całej ligi — czyli z puli rzędu 450+
-  zawodników w sezonie. Daje to bardzo mały odsetek pozytywów (~3%, proporcja ok. 33:1).
-- **All-Rookie:** wybieranych jest 10 zawodników, ale **wyłącznie spośród debiutantów** —
+- **All-NBA:** wybieranych jest 15 zawodników z całej ligi - czyli z puli rzędu 450+
+  zawodników w sezonie. Daje to bardzo mały odsetek pozytywów (proporcja ~31.5:1).
+- **All-Rookie:** wybieranych jest 10 zawodników, ale **wyłącznie spośród debiutantów** -
   a tych grających na zauważalnym poziomie jest w sezonie zaledwie kilkudziesięciu. W efekcie
   **stosunek liczby wybranych do liczby kandydatów jest dużo wyższy dla rookies** niż dla
-  All-NBA (rzędu kilkunastu procent zamiast ~3%).
+  All-NBA (proporcja ~7.2:1).
 
 Innymi słowy: choć rookies mają tylko dwa zespoły zamiast trzech, ich pula kandydatów jest na
 tyle mała, że **niezbalansowanie klas dla modelu rookie jest znacznie łagodniejsze**. Ma to
 praktyczne konsekwencje: dynamicznie dobierany `scale_pos_weight` jest dla modelu rookie
 odpowiednio mniejszy, a samo „trafienie” jest statystycznie łatwiejsze niż w przypadku
-All-NBA (mniejsza i bardziej jednorodna pula kandydatów). (Liczebności puli kandydatów są
-orientacyjne i zależą od progu minimalnej liczby meczów.)
-
----
-
-## 8. Ograniczenia (limitations)
-
-- Model rankinguje wyłącznie po ogólnym prawdopodobieństwie i **nie wymusza balansu pozycji**.
-  NBA zniosła obowiązek pozycyjny dla zespołów All-NBA w 2023 r., więc dla najnowszych sezonów
-  jest to właściwe, ale nieco obniża porównywalność z wcześniejszymi sezonami treningowymi.
-- Wykorzystywane są statystyki **wyłącznie z sezonu zasadniczego** — występy w playoffach nie
-  są brane pod uwagę.
-- Kontuzje, zawieszenia czy kwestie regulaminowe znane głosującym, a nieodzwierciedlone w
-  statystykach, **nie są modelowane**.
-- Dla świeżo debiutujących zawodników lub nietypowych zapisów nazwisk **łączenie** nazw z NBA
-  API i Basketball Reference może sporadycznie się nie powieść.
+All-NBA (mniejsza i bardziej jednorodna pula kandydatów).

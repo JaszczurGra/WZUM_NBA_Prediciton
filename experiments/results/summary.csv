@@ -1,0 +1,8 @@
+name,avg_pts,avg_std,avg_max,current_pts,current_max,allnba_pts,rookie_pts,allnba_overlap,rookie_overlap,mean_overlap,description
+baseline,238.0,32.87,450,322,450,136.1,101.9,0.8023,0.7828,0.7925500000000001,"Production config: XGB depth=5, lr=0.05, 300 trees, monotone, dynamic scale_pos_weight."
+deep_slow,237.55,32.48,450,293,450,135.34,102.21,0.8023,0.7828,0.7925500000000001,"XGB depth=8, lr=0.02, 800 trees, monotone, dynamic scale_pos_weight."
+shallow_fast,234.48,35.44,450,315,450,133.34,101.14,0.8023,0.7828,0.7925500000000001,"XGB depth=3, lr=0.10, 200 trees, monotone, dynamic scale_pos_weight."
+no_class_weight,232.34,30.92,450,301,450,133.48,98.86,0.7954,0.7759,0.78565,Baseline XGB but scale_pos_weight=1 (no class-imbalance handling).
+strong_reg,229.31,29.53,450,291,450,130.76,98.55,0.8023,0.7828,0.7925500000000001,"XGB depth=5, lr=0.05, 500 trees + strong regularization (reg_lambda=5, min_child_weight=5, gamma=1, subsample/colsample=0.8)."
+xgb_no_monotone,228.72,28.06,450,331,450,132.66,96.07,0.7839,0.7586,0.77125,"Ablation: baseline XGB (depth=5, lr=0.05, 300 trees) with monotone constraints OFF."
+random_forest,227.41,31.13,450,259,450,131.48,95.93,0.7885,0.7724,0.78045,"RandomForest 400 trees, class_weight='balanced' (no monotone constraints)."
